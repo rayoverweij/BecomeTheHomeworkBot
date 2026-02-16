@@ -1,27 +1,11 @@
-# AIP
+# Become the Homework Bot
 
-AIP: Invitations into the Black Box
+Code for 'Become the Homework Bot' workshops. Continuation of the 'Stepping Into the Black Box' project by Sarah Immel, Neel Rajani, and me (Rayo Verweij).
 
-## Commands for setup (on macOS/Linux)
+## Setup
 
-Requirements: Python, pip, Node, npm
+- In server, install dependencies with uv
 
-- Create a venv called aip
-  - `python3 -m venv aip`
+- In frontend, install dependencies with npm
 
-- Activate the venv
-  - `source aip/bin/activate`
-
-- In backend, install the requirements from requirements.txt
-  - `cd backend`
-  - `pip install -r requirements.txt`
-
-- In frontend, install the dependencies
-  - `cd ../frontend`
-  - `npm i`
-
-- Run the server
-  - `cd ../backend`
-  - `python main.py`
-
-The UI will now be accessible at `localhost:5173`.
+- Run both server and frontend separately from their folders

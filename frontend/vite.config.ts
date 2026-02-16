@@ -10,7 +10,7 @@ export default ({ mode }: { mode: string }) => {
 
   // Configure Vite
   return defineConfig({
-    base: "/s2118232/",
+    // base: "/s2118232/",
     plugins: [
       legacy({ targets: ["defaults", "iOS 10", "iOS 10.3"] }),
       nodePolyfills(), 

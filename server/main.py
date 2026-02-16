@@ -1,9 +1,7 @@
-# Main driver file to prompt our model
+# Main driver file to set up the server
 # System imports
 import asyncio
-import json
 from os import getenv, path
-import subprocess
 
 # External imports
 from dotenv import load_dotenv
@@ -24,7 +22,7 @@ from llm import LLM
 device = "cpu"
 if torch.cuda.is_available(): device = "cuda"
 elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available(): device = "mps"
-# print(f"Using device {device}")
+print(f"Using device {device}")
 
 # Read in environment variables
 app_base_path = path.dirname(__file__)
@@ -36,7 +34,7 @@ api_http_port=int(getenv("API_HTTP_PORT"))
 api_http_url=getenv("API_HTTP_URL")
 
 ui_folder_root="frontend"
-ui_proxy_launch_cmd = getenv("UI_PROXY_LAUNCH_CMD")
+# ui_proxy_launch_cmd = getenv("UI_PROXY_LAUNCH_CMD")
 
 app_frontend_path = path.join(app_root_path, ui_folder_root)
 
@@ -115,14 +113,6 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 
 
 if __name__ == "__main__":
-    # Launch the frontend app as a separate Python subprocess
-    # (essentially just goes to the frontend server and runs 'npm run dev' there for us)
-    # No longer used now that the backend and frontend are separated
-    # spa_process = subprocess.Popen(
-    #     args=ui_proxy_launch_cmd.split(" "),
-    #     cwd=app_frontend_path
-    # )
-
-    # Launch the backend server
+    # Launch the server
     # Uvicorn is a server programme that runs the 'app' object in 'main.py' (here)
     uvicorn.run("main:app", host=server_http_host, port=api_http_port)

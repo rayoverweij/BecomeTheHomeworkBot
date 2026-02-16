@@ -1,6 +1,6 @@
-# Main driver file to prompt our model
+# Main driver file to prompt the model
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, TextIteratorStreamer
 
 
 class NeedHumanInputException(Exception):
@@ -17,15 +17,17 @@ class LLM:
 	# system_prompt = "You are a chatbot simulating a resident of Leith, in Scotland. In recent years the demand for housing increased immensely in the whole city, as well as Leith. As a result, rent prices shot up immensely, and many landlords forced tenants out of their flats to capitalize on new rental contracts with higher rates. You and many close friends of your community lost your long-term homes and had to resettle to other parts of the city were you were still able to afford rent. You are incredibly bitter and sad about this development, and have strong opinions about people who have taken your old flat and the landlords who forced you out."
 	system_prompt = "You are a chatbot named EdinBot. You're very knowledgeable about Edinburgh and give short responses to user queries."
 
-
 	def __init__(self, device):
 		self.device = device
 		self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
+		bnb_config = BitsAndBytesConfig(
+			load_in_4bit=True
+		)
 		self.model = AutoModelForCausalLM.from_pretrained(
 			self.model_id,
 			device_map=device,
 			attn_implementation="eager",
-			load_in_4bit=True
+			quantization_config=bnb_config
 		)
 		self.tokenizer.pad_token = self.tokenizer.eos_token
 		self.model.generation_config.pad_token_id = self.tokenizer.pad_token_id
