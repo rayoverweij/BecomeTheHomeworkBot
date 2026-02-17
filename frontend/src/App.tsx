@@ -27,7 +27,6 @@ const downloadFile = (uriComponent: string | number | boolean, fileName: string)
 
 
 const App = () => {
-  const [showWelcome, setShowWelcome] = useState(true);
   const [waitingForQuery, setWaitingForQuery] = useState(true);
   const [gameFinished, setGameFinished] = useState(false);
 
@@ -68,7 +67,6 @@ const App = () => {
         setGameFinished(false);
         setWaitingForQuery(true);
         setUserQuery("");
-        setShowWelcome(true);
         if (loc === "inside") {
           const queryLabel = document.getElementById("userQueryLabel")!;
           queryLabel.innerText = "Waiting for user query...";
@@ -218,26 +216,6 @@ const App = () => {
       }
   </>) : (
     <div>
-      {/* Welcome screen */}
-      { showWelcome &&
-        <div className="absolute position-center flex flex-col justify-around p-8 text-center z-10 w-[90vw] h-[90vh] mx-[5vw] my-[5vh] bg-[black] rounded-lg border-solid border-[#84cc16] border-2 text-[#65a30d] shadow-[0px_0px_30px_#65a30d]">
-          <h2 className="font-bold text-2xl">
-            Welcome!
-          </h2>
-          <p className="text-xl">
-            Text generators respond to prompts by predicting the most likely next token, building replies one word at a time. A bit of randomness, like choosing (sampling) from the top 5 words instead of the most likely one, keeps their answers interesting but also makes them less reliable.
-          </p>
-          <p className="text-xl">
-            Today, <span className="underline">you</span> get to be that random factor. See how much your choices steer the output, and decide exactly how helpful you want EdinBot to be!
-          </p>
-          <button
-            className="w-fit mx-auto p-6 bg-[#84cc16] hover:bg-[#a3e635] active:bg-[#4d7c0f] rounded font-bold text-[black] text-xl uppercase"
-            onClick={() => setShowWelcome(false)}
-          >
-            Get started
-          </button>
-        </div>
-      }
       {/* Inside interface */}
       <div className="flex flex-col items-center justify-between h-screen px-4 py-12 bg-[black] text-[#65a30d]">
         <div className="flex flex-row justify-start margin-20 mb-4 text-lg font-bold border-solid border-[#84cc16] border-2 p-2 shadow-[4px_4px_0px_#65a30d]">
