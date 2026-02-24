@@ -15,7 +15,8 @@ class LLM:
 	num_choices = 5
 	chat_history = []
 	# system_prompt = "You are a chatbot simulating a resident of Leith, in Scotland. In recent years the demand for housing increased immensely in the whole city, as well as Leith. As a result, rent prices shot up immensely, and many landlords forced tenants out of their flats to capitalize on new rental contracts with higher rates. You and many close friends of your community lost your long-term homes and had to resettle to other parts of the city were you were still able to afford rent. You are incredibly bitter and sad about this development, and have strong opinions about people who have taken your old flat and the landlords who forced you out."
-	system_prompt = "You are a chatbot named EdinBot. You're very knowledgeable about Edinburgh and give short responses to user queries."
+	# system_prompt = "You are a chatbot named EdinBot. You're very knowledgeable about Edinburgh and give short responses to user queries."
+	system_prompt = "Imagine you are the famous Scottish poet Robert Burns. Answer any query as if you are him, drawing upon all of your knowledge of him, his works, and the time period in which he lived, ansewring as accurately as possible. Aim your answers at high school students who are in a history class but never tell them that you're aware that they're the audience."
 
 	def __init__(self, device):
 		self.device = device
@@ -57,9 +58,9 @@ class LLM:
 		self.input_ids = inputs["input_ids"]
 		self.num_tokens_input = self.input_ids.shape[-1]
 		self.attention_mask = inputs["attention_mask"]
-		self.top_1_threshold = 0.2
-		self.default_top_1_threshold = 0.2
-		self.threshold_increase = 0.02
+		self.top_1_threshold = 0.4
+		self.default_top_1_threshold = 0.4
+		self.threshold_increase = 0.025
 
 		# Generate a token at a time
 		while self.max_new_tokens > 0:
@@ -106,7 +107,7 @@ class LLM:
 		topk = torch.squeeze(topk).tolist()
 		self.indices = torch.squeeze(indices)
 
-		# If highest probability is below 40% we branch
+		# If highest probability is below 20% we branch
 		if topk[0] < self.top_1_threshold:
 			print(f"top-1 probability was {topk[0]}, which is smaller than {self.top_1_threshold}. Branching and resetting to {self.default_top_1_threshold}")
 			self.top_1_threshold = self.default_top_1_threshold
