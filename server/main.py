@@ -99,9 +99,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         while True:
             input = await websocket.receive_json()
             if input["type"] == "start_game":
-                prompt = input["data"]
-                await manager.broadcast({ "type": "prompt", "data": prompt })
-                await llm.start_game(prompt, manager.broadcast)
+                input = input["data"]
+                await manager.broadcast({ "type": "prompt", "data": input })
+                await llm.start_game(input, manager.broadcast)
             elif input["type"] == "reset_game":
                 await manager.broadcast({ "type": "reset" })
             else:

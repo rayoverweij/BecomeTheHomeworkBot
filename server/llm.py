@@ -8,26 +8,28 @@ class NeedHumanInputException(Exception):
 
 
 class LLM:
-	model_id = "meta-llama/Llama-3.1-8B-Instruct"
-	# model_id = "Unispac/Gemma-2-9B-IT-With-Deeper-Safety-Alignment"
-	# model_id = "meta-llama/Llama-3.2-3B-Instruct"
+	# model_id = "allenai/Olmo-3-7B-Instruct"
+	model_id = "allenai/Olmo-3.1-32B-Instruct"
+	# model_id = "meta-llama/Llama-3.1-8B-Instruct"
 	
 	num_choices = 5
 	chat_history = []
 	# system_prompt = "You are a chatbot simulating a resident of Leith, in Scotland. In recent years the demand for housing increased immensely in the whole city, as well as Leith. As a result, rent prices shot up immensely, and many landlords forced tenants out of their flats to capitalize on new rental contracts with higher rates. You and many close friends of your community lost your long-term homes and had to resettle to other parts of the city were you were still able to afford rent. You are incredibly bitter and sad about this development, and have strong opinions about people who have taken your old flat and the landlords who forced you out."
 	# system_prompt = "You are a chatbot named EdinBot. You're very knowledgeable about Edinburgh and give short responses to user queries."
-	system_prompt = "Imagine you are the famous Scottish poet Robert Burns. Answer any query as if you are him, drawing upon all of your knowledge of him, his works, and the time period in which he lived, ansewring as accurately as possible. Aim your answers at high school students who are in a history class but never tell them that you're aware that they're the audience."
+	system_prompt_homework = "You are the Homework Helper, a bot made for teenagers to help them complete their homework."
+	system_prompt_burns = "Imagine you are the famous Scottish poet Robert Burns. Answer any query as if you are him, drawing upon all of your knowledge of him, his works, and the time period in which he lived, answering as accurately as possible."
 
 	def __init__(self, device):
 		self.device = device
 		self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
 		bnb_config = BitsAndBytesConfig(
-			load_in_4bit=True
+			load_in_8bit=True
 		)
 		self.model = AutoModelForCausalLM.from_pretrained(
 			self.model_id,
 			device_map=device,
 			attn_implementation="eager",
+			torch_dtype=torch.float16,
 			quantization_config=bnb_config
 		)
 		self.tokenizer.pad_token = self.tokenizer.eos_token
@@ -44,18 +46,27 @@ class LLM:
 		)
 
 
-	async def start_game(self, prompt: str, broadcast):
+	async def start_game(self, input: str, broadcast):
 		# Reset how much we are allowed to generate
 		self.max_new_tokens = 150
 
+		sp = ""
+		if input[1] == "homeworkHelper":
+			sp = self.system_prompt_homework
+		elif input[1] == "burnsBot":
+			sp = self.system_prompt_burns
+		else:
+			sp = input[1]
+
 		messages = [
-			{"role": "system", "content": self.system_prompt},
-			{"role": "user", "content": prompt}
+			{"role": "system", "content": sp},
+			{"role": "user", "content": input[0]}
 		]
 		input_messages = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
 		inputs = self.tokenizer(input_messages, return_tensors='pt').to(self.device)
 
 		self.input_ids = inputs["input_ids"]
+		self.input_ids.to('cuda')
 		self.num_tokens_input = self.input_ids.shape[-1]
 		self.attention_mask = inputs["attention_mask"]
 		self.top_1_threshold = 0.4
@@ -133,13 +144,16 @@ class LLM:
 		self.input_ids = torch.cat((self.input_ids, choice), dim=1)
 		self.attention_mask = torch.ones(1, self.input_ids.shape[-1]).to(self.device)
 		detokenized_current_text = self.tokenizer.decode(self.input_ids.squeeze()[self.num_tokens_input:])
-		detokenized_choice = self.tokenizer.decode(int(choice))
+		# detokenized_choice = self.tokenizer.decode(int(choice))
 
 		print(detokenized_current_text)
-		if "<|eot_id|>" in detokenized_current_text:
+		if "<|endoftext|>" in detokenized_current_text:
 			await broadcast({ "type": "finish" })
 			self.max_new_tokens = 0
 			print("EOT was detected in output, ending generation...")
 		else:
-			await broadcast({ "type": "next_token", "data": detokenized_choice })
+			# Send next token
+			# await broadcast({ "type": "next_token", "data": detokenized_choice })
+			# Send entire response
+			await broadcast({ "type": "next_token", "data": detokenized_current_text })
 		# yield self.tokenizer.decode(int(choice))

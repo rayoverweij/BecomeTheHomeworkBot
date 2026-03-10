@@ -14,6 +14,7 @@ export default ({ mode }: { mode: string }) => {
       tailwindcss()
     ],
     server: {
+      allowedHosts: ["1f54-192-41-125-255.ngrok-free.app"],
       proxy: {
         "/api": {
           target: process.env.API_HTTP_URL,
